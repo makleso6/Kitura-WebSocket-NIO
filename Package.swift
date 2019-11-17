@@ -18,6 +18,39 @@
  **/
 
 import PackageDescription
+ 
+#if os(Linux)
+var targets: [PackageDescription.Target] = [
+    .systemLibrary(
+        name: "CZlib",
+        pkgConfig: "libz",
+        providers: [
+            .apt(["libz-dev"])
+        ]
+    ),
+    .target(
+        name: "KituraWebSocket",
+        dependencies: ["CZlib", "KituraNet"]),
+    .target(
+        name: "TestWebSocketService",
+        dependencies: ["KituraNet", "KituraWebSocket"]),
+    .testTarget(
+        name: "KituraWebSocketTests",
+        dependencies: ["KituraWebSocket", "Cryptor"])
+]
+#else
+var targets: [PackageDescription.Target] = [
+    .target(
+        name: "KituraWebSocket",
+        dependencies: ["KituraNet"]),
+    .target(
+        name: "TestWebSocketService",
+        dependencies: ["KituraNet", "KituraWebSocket"]),
+    .testTarget(
+        name: "KituraWebSocketTests",
+        dependencies: ["KituraWebSocket", "Cryptor"])
+]
+#endif
 
 let package = Package(
     name: "KituraWebSocket",
@@ -32,24 +65,5 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/Kitura-NIO.git", from: "2.2.0"),
         .package(url: "https://github.com/IBM-Swift/BlueCryptor.git", from: "1.0.0"),
     ],
-    targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
-        .systemLibrary(
-            name: "CZlib",
-            pkgConfig: "libz",
-            providers: [
-                .apt(["libz-dev"])
-            ]
-        ),
-        .target(
-            name: "KituraWebSocket",
-            dependencies: ["CZlib", "KituraNet"]),
-        .target(
-            name: "TestWebSocketService",
-            dependencies: ["KituraNet", "KituraWebSocket"]),
-        .testTarget(
-            name: "KituraWebSocketTests",
-            dependencies: ["KituraWebSocket", "Cryptor"])
-    ]
+    targets: targets
 )
